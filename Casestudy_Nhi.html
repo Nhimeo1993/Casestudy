@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lí sản phẩm</title>
+</head>
+<body>
+        <form>
+            <ul>
+                <li>
+                    <div style="font-weight: bold; font-family: Arial, Helvetica, sans-serif;">Product Name</div>
+                    <input type="text" style="width: 706px;height: 22px;background-color:#f7f69e;border: 1px solid grey;" id="product_name">
+                </li>
+                <li>
+                    <div style="font-weight: bold; font-family: Arial, Helvetica, sans-serif;">Manufacturer Name</div>
+                    <select type="text" style="width: 712px;height: 29px;border: 1px solid grey;" id="manufacturer_name" >
+                    </select>
+                </li>
+                <li>
+                    <div style="font-weight: bold; font-family: Arial, Helvetica, sans-serif;">Price</div>
+                    <input type="text" style="width: 706px;height: 22px;border: 1px solid grey;" id="price" onkeyup="updateTotalPrice()">
+                </li>
+                <li>
+                    <div style="font-weight: bold; font-family: Arial, Helvetica, sans-serif;">Quantity</div>
+                    <input type="text" style="width: 706px;height: 22px;border: 1px solid grey;" id="quantity" onkeyup="updateTotalPrice()">
+                </li>
+                <li>
+                    <div style="font-weight: bold; font-family: Arial, Helvetica, sans-serif;">Total Price</div>
+                    <input type="text" style="width: 706px;height: 22px;border: 1px solid grey;background-color: rgb(241, 232, 232);" id="total_price" disabled>
+                </li>
+                <div style="display: flex;">
+                    <button type="button" style="background-color: #6895e3" onclick="addProduct()">Add products</button>
+                    &emsp;&emsp;
+                    <button style="background-color: #e6d08a" type="reset" id="reset_btn">Reset</button>
+                </div>
+            </ul>
+        </form>
+    <table border="1" cellspacing='0' cellpadding="5" style="margin-top: 50px;">
+        <caption style="background-color: #4970a3;color: white;height: 30px;padding-top: 8px;">Management Products</caption>
+        <thead>
+            <tr id="headtable">
+                <th>No</th>
+                <th>Product Name</th>
+                <th>Manufacturer Name</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Total Price</th>
+                <th>&emsp;&emsp;</th>
+                <th>&emsp;&emsp;</th>
+            </tr>
+        </thead>
+        <tbody id="bodytable">
+        </tbody>
+    </table>
+
+    <script>
+        
+        
+        let manufacturerList = ["Apple", "Samsung", "GL", "Sony"]
+            
+        //Hien thi danh sach nsx len tag: manufacturer_name
+        //xoa cac phan tu trong tag: manufacturer_name
+        let  manufacturerTag = document.getElementById('manufacturer_name');
+        manufacturerTag.innerHTML = '<option value="">-- Chon --</option>';
+        for(let i = 0; i < manufacturerList.length; i++) 
+        {
+            manufacturerTag.innerHTML += `<option value="${manufacturerList[i]}">${manufacturerList[i]}</option>`
+        } 
+
+        let dataList = []
+        //lay du lieu tu localStorage
+        json = localStorage.getItem('dataList')
+        console.log(json)
+        dataList = JSON.parse(json)
+        console.log(dataList)
+        showData()
+
+        function updateTotalPrice() {
+            price = document.getElementById('price').value;
+            quantity = document.getElementById('quantity').value;
+            total = price * quantity;
+
+            document.getElementById('total_price').value = total;
+        }
+
+       
+        function addProduct() {
+            product_name = document.getElementById('product_name').value;
+            manufacturer_name = document.getElementById('manufacturer_name').value;
+            price = document.getElementById('price').value;
+            quantity = document.getElementById('quantity').value;
+            total_price = document.getElementById('total_price').value;
+
+            product = {
+                'product_name': product_name,
+                'manufacturer_name': manufacturer_name,
+                'price': price,
+                'quantity': quantity,
+                'total_price': total_price
+            }
+            
+            if(currentIndex >= 0) {
+                //update
+                dataList[currentIndex] = product;
+
+            } else {
+                //them moi
+                dataList.push(product);
+            }
+            
+            showData();
+
+            document.getElementById('reset_btn').click();
+        }
+
+        function showData() {
+            let bodytableTag = document.getElementById('bodytable');
+            bodytableTag.innerHTML = '';
+
+            for (let i = 0; i < dataList.length; i++) {
+                bodytableTag.innerHTML += `<tr>
+                                                <td>${i+1}</td>
+                                                <td>${dataList[i].product_name}</td>
+                                                <td>${dataList[i].manufacturer_name}</td>
+                                                <td>${dataList[i].price}</td>
+                                                <td>${dataList[i].quantity}</td>
+                                                <td>${dataList[i].total_price}</td>
+                                                <td><button onclick="editProduct(${i})">Edit</button></td>
+                                                <td><button onclick="deleteProduct(${i})">Delete</button></td>
+                                            </tr>`
+            }
+
+            //luu du lieu vao localStorage
+            console.log(dataList);
+
+            //chuyen array -> string
+            json = JSON.stringify(dataList);
+            localStorage.setItem('dataList', json);
+        }
+
+        let currentIndex = -2;
+ 
+        function editProduct(index) {
+            currentIndex = index;
+
+            product = dataList[index];
+            document.getElementById('product_name').value = product.product_name;
+            document.getElementById('manufacturer_name').value = product.manufacturer_name ; 
+            document.getElementById('price').value = product.price;
+            document.getElementById('quantity').value = product.quantity;
+            document.getElementById('total_price').value = product.total_price;
+        }
+
+        function deleteProduct(index) {
+            let option = confirm("Ban co chac chan muon xoa san pham nay khong?");
+            if(!option) {
+                return
+            }
+
+            dataList.splice(index, 1);
+
+            showData();
+        }
+    </script>
+</body>
+</html>
